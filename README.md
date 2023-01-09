@@ -1,2 +1,436 @@
 # vba-challenge
 UOM_DS VBA stock ticker challenge
+
+obert Bentz Readme.md additions for homework turn-in
+
+Below are two text files (macro scripts, txt format) used in the spreadsheet, "Multiple_year_stock_data_RDB.xlsm".
+The second file is a stepped version to check how the script is running (Page6). Page7 the MsgBox was remarked out.
+
+The, "Year Open Value", column is incorrect. It is pulling from the last row for a ticker. Same row is used for the, "Year Close Value".
+Due to the incorrect opening value, the calculation results will be incorrect, and blows through and affects everything else.
+Additionally, the Ticker matching in the side summary table was not working. The values did seem to test OK.
+
+Pages7 VBA script
+Sub Pages7()
+
+'Module12 location
+
+'This script removes the message boxes showing progress through the script
+
+For Each ws In ThisWorkbook.Worksheets
+
+    'To loop through all the worksheet pages
+    Dim WorksheetName As String
+    ' Get the worksheet name
+    WorksheetName = ws.Name
+    'Set ws = Worksheets(ws.Name)
+    ' Check worksheet name is working with output
+    'MsgBox (WorksheetName)
+    
+    'Make header titles stand out from data
+    ws.Range("A1:R1").Font.Bold = True
+    ws.Range("A1:R1").Interior.ColorIndex = 6
+    ws.Range("A1:R1").WrapText = True
+    
+    ' Freezing the row failed after first page?
+    'ws.Range("B2").EntireRow.Select
+    'ActiveWindow.FreezePanes = True
+    'ws.Range("B2").Select
+    
+     'ws.Range("B2").ActiveWindow.FreezePanes = True
+     'Range("B2").Select
+     'ActiveWindow.FreezePanes = True
+    
+        ' Set an initial variable for holding the ticker name
+        Dim Ticker_Name3 As String
+        ' Set an initial variable for holding the total per ticker name
+        Dim Ticker_Volume As Double
+        ' Set variable to hold yearly change calculation
+        Dim Yearly_Change As Double
+        ' Set variable to hold percent change of value calculation
+        Dim Percent_Change As Double
+        ' Check by comparing dates for lowest value
+        Dim Starting_Date As Integer
+        ' Set starting open value for single ticker loop (for the year requirement)
+        Dim Year_Open_Ticker As Double
+        ' Set ending close value for single ticker loop (for the year requirement)
+        Dim Year_Close_Ticker As Double
+               
+        ' Label column headers to match lesson
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Yearly Change"
+        ws.Cells(1, 11).Value = "Percent Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        ws.Cells(1, 13).Value = "Year Open Value"
+        ws.Cells(1, 14).Value = "Year Close Value"
+        
+        ' Moving the labels below so the later steps can be seen
+        ' ws.Cells(1, 17).Value = "Ticker"
+        ' ws.Cells(1, 18).Value = "Value"
+        
+        ' Label row headers to match lesson
+        ' ws.Cells(2, 16).Value = "Greatest % Increase"
+        ' ws.Cells(3, 16).Value = "Greatest % Decrease"
+        ' ws.Cells(4, 16).Value = "Greatest Total Volume"
+                                  
+        ' Locate last used (not empty) row for column A
+        LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        'MsgBox ("Total Rows On This Page: " + Str(LastRow))
+               
+        ' Initial count up loop to reset to 0 when ticker changes
+        Ticker_Volume = 0
+        ' Data row starts at 2 (avoid header)
+        Row_Counter = 2
+        ' Keep track of the location for each ticker name in the summary table (starts at row 2)
+        Dim Summary_Table_Row As Integer
+        Summary_Table_Row = 2
+        
+        ' Loop through all ticker name volumes for comparison table
+        For I = 2 To LastRow
+            ' Check if we are still within the same ticker name, and if not?
+            If ws.Cells(I + 1, 1).Value <> ws.Cells(I, 1).Value Then
+              ' Set the Ticker_Name3
+              Ticker_Name3 = ws.Cells(I, 1).Value
+              ' Set ticker's open value for the year
+              Year_Open_Ticker = ws.Cells(I, 3).Value
+              ' Set ticker's close value for the year
+              Year_Close_Ticker = ws.Cells(I, 6).Value
+              ' Calculate Yearly Stock Change
+              Yearly_Change = Year_Close_Ticker - Year_Open_Ticker
+              ' Calculate percent change of stock value for the year
+              Percent_Change = Yearly_Change / Year_Open_Ticker
+              ' Add to the ticker's name volume
+              Ticker_Volume = Ticker_Volume + ws.Cells(LastRow, 7).Value
+        
+              ' Print the ticker name in the Summary Table
+              ws.Range("I" & Summary_Table_Row).Value = Ticker_Name3
+              ' Print the yearly change in the Summary Table
+              ws.Range("J" & Summary_Table_Row).Value = Yearly_Change
+              ' Accidentally formated as percentage, need to re-specify normal number format
+              ws.Range("J" & Summary_Table_Row).NumberFormat = "0.00"
+              ' Change cell color if conditions are met
+              If ws.Range("J" & Summary_Table_Row).Value > 0 Then
+                ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+                ElseIf ws.Range("J" & Summary_Table_Row).Value < 0 Then
+                ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+                Else: ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 6
+              End If
+              
+              ' Print the percent change in yearly stock value in the Summary Table
+              ws.Range("K" & Summary_Table_Row).Value = Percent_Change
+              ws.Range("K" & Summary_Table_Row).NumberFormat = "0.00%"
+              ' Print the ticker volume to the Summary Table
+              ws.Range("L" & Summary_Table_Row).Value = Ticker_Volume
+              ws.Range("L" & Summary_Table_Row).ColumnWidth = 18
+              ws.Range("L" & Summary_Table_Row).NumberFormat = "#,##0"
+              ' Print the ticker yearly starting open value in summary table
+              ws.Range("M" & Summary_Table_Row).Value = Year_Open_Ticker
+              ' Print the ticker yearly ending close value in summary table
+              ws.Range("N" & Summary_Table_Row).Value = Year_Close_Ticker
+        
+              ' Add one to the summary table row
+              Summary_Table_Row = Summary_Table_Row + 1
+              
+              ' Reset the ticker volume
+              Ticker_Volume = 0
+        
+            ' If the cell immediately following a row is the same ticker symbol...
+            Else
+        
+              ' Add to the ticker volume
+              Ticker_Volume = Ticker_Volume + ws.Cells(I, 7).Value
+                                                        
+        End If
+        
+                              
+      Next I
+             
+ ' Attempting a few methods to get the summary table correct. Ticker match not working...
+ ' WorksheetFunction.vlookup didn't work...
+            
+            Dim MaxValue As Double
+            Dim MinValue As Double
+            Dim MaxVolume As Double
+            Dim LastRowTable As Integer
+                                   
+            ' Label column headers to match lesson
+            ws.Cells(1, 17).Value = "Ticker"
+            ws.Cells(1, 18).Value = "Value"
+        
+            ' Label row headers to match lesson
+            ws.Cells(2, 16).Value = "Greatest % Increase"
+            ws.Cells(2, 16).ColumnWidth = 22
+            ws.Cells(2, 16).Font.Bold = True
+            ws.Cells(3, 16).Value = "Greatest % Decrease"
+            ws.Cells(3, 16).Font.Bold = True
+            ws.Cells(4, 16).Value = "Greatest Total Volume"
+            ws.Cells(4, 16).Font.Bold = True
+            
+            ' Locate last used (not empty) row for column R (max/min table)
+            LastRowTable = ws.Cells(Rows.Count, 9).End(xlUp).Row
+            'MsgBox ("Total Ticker Symbols: " + Str(LastRowTable))
+            
+            ' Lowest value of column K, starting at 0
+            MinValue = 0
+            ' Highest value of column K, starting at 0
+            MaxValue = 0
+            ' Greatest trading volume value of column L, starting at 0
+            MaxVolume = 0
+            
+            MinValue = WorksheetFunction.Min(ws.Range("K:K"))
+            MaxValue = WorksheetFunction.max(ws.Range("K:K"))
+            MaxVolume = WorksheetFunction.max(ws.Range("L:L"))
+            'MsgBox MinValue
+            'MsgBox MaxValue
+            'MsgBox MaxVolume
+            ws.Cells(2, 18).Value = MinValue
+            ws.Cells(2, 18).NumberFormat = "0.00%"
+            ws.Cells(3, 18).Value = MaxValue
+            ws.Cells(3, 18).NumberFormat = "0.00%"
+            ws.Cells(4, 18).Value = MaxVolume
+            ws.Cells(4, 18).NumberFormat = "#,##0"
+            ws.Cells(4, 18).ColumnWidth = 18
+            
+            Dim MinValueTicker As String
+            Dim MaxValueTicker As String
+            Dim MaxVolumeTicker As String
+            Dim SummaryRange As Range
+            
+            'Set SummaryRange = Range(Cells(2, 9), Cells(91, 9))
+            'MinValueTicker = Application.WorksheetFunction.VLookup(MinValue, SummaryRange, 1, False)
+            'ws.Cells(2, 17).Value = MinValueTicker
+                           
+             'For N = 2 To LastRowTable
+                'If ws.Cells(3, 18).Value = ws.Cells(N, 11).Value Then
+                    'MinValueTicker = ws.Cells(N, 11)
+                    'ws.Cells(17, 3).Value = MinValueTicker
+                'End If
+            
+             'Next N
+            
+                               
+                   
+                                                      
+        'End If
+        
+                              
+      'Next I
+               
+Next ws
+
+End Sub
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------
+Pages6() VBA script in txt
+Sub Pages6()
+
+' Module9 location
+
+' This script uses message boxes to show progress through the script
+
+For Each ws In ThisWorkbook.Worksheets
+
+    'To loop through all the worksheet pages
+    Dim WorksheetName As String
+    ' Get the worksheet name
+    WorksheetName = ws.Name
+    'Set ws = Worksheets(ws.Name)
+    ' Check worksheet name is working with output
+    MsgBox (WorksheetName)
+    
+    'Make header titles stand out from data
+    ws.Range("A1:R1").Font.Bold = True
+    ws.Range("A1:R1").Interior.ColorIndex = 6
+    ws.Range("A1:R1").WrapText = True
+    
+    ' Freezing the row failed after first page?
+    'ws.Range("B2").EntireRow.Select
+    'ActiveWindow.FreezePanes = True
+    'ws.Range("B2").Select
+    
+     'ws.Range("B2").ActiveWindow.FreezePanes = True
+     'Range("B2").Select
+     'ActiveWindow.FreezePanes = True
+    
+        ' Set an initial variable for holding the ticker name
+        Dim Ticker_Name3 As String
+        ' Set an initial variable for holding the total per ticker name
+        Dim Ticker_Volume As Double
+        ' Set variable to hold yearly change calculation
+        Dim Yearly_Change As Double
+        ' Set variable to hold percent change of value calculation
+        Dim Percent_Change As Double
+        ' Check by comparing dates for lowest value
+        Dim Starting_Date As Integer
+        ' Set starting open value for single ticker loop (for the year requirement)
+        Dim Year_Open_Ticker As Double
+        ' Set ending close value for single ticker loop (for the year requirement)
+        Dim Year_Close_Ticker As Double
+               
+        ' Label column headers to match lesson
+        ws.Cells(1, 9).Value = "Ticker"
+        ws.Cells(1, 10).Value = "Yearly Change"
+        ws.Cells(1, 11).Value = "Percent Change"
+        ws.Cells(1, 12).Value = "Total Stock Volume"
+        ws.Cells(1, 13).Value = "Year Open Value"
+        ws.Cells(1, 14).Value = "Year Close Value"
+        
+        ' Moving the labels below so the later steps can be seen
+        ' ws.Cells(1, 17).Value = "Ticker"
+        ' ws.Cells(1, 18).Value = "Value"
+        
+        ' Label row headers to match lesson
+        ' ws.Cells(2, 16).Value = "Greatest % Increase"
+        ' ws.Cells(3, 16).Value = "Greatest % Decrease"
+        ' ws.Cells(4, 16).Value = "Greatest Total Volume"
+                                  
+        ' Locate last used (not empty) row for column A
+        LastRow = ws.Cells(Rows.Count, 1).End(xlUp).Row
+        MsgBox ("Total Rows On This Page: " + Str(LastRow))
+               
+        ' Initial count up loop to reset to 0 when ticker changes
+        Ticker_Volume = 0
+        ' Data row starts at 2 (avoid header)
+        Row_Counter = 2
+        ' Keep track of the location for each ticker name in the summary table (starts at row 2)
+        Dim Summary_Table_Row As Integer
+        Summary_Table_Row = 2
+        
+        ' Loop through all ticker name volumes for comparison table
+        For I = 2 To LastRow
+            ' Check if we are still within the same ticker name, and if not?
+            If ws.Cells(I + 1, 1).Value <> ws.Cells(I, 1).Value Then
+              ' Set the Ticker_Name3
+              Ticker_Name3 = ws.Cells(I, 1).Value
+              ' Set ticker's open value for the year
+              Year_Open_Ticker = ws.Cells(I, 3).Value
+              ' Set ticker's close value for the year
+              Year_Close_Ticker = ws.Cells(I, 6).Value
+              ' Calculate Yearly Stock Change
+              Yearly_Change = Year_Close_Ticker - Year_Open_Ticker
+              ' Calculate percent change of stock value for the year
+              Percent_Change = Yearly_Change / Year_Open_Ticker
+              ' Add to the ticker's name volume
+              Ticker_Volume = Ticker_Volume + ws.Cells(LastRow, 7).Value
+        
+              ' Print the ticker name in the Summary Table
+              ws.Range("I" & Summary_Table_Row).Value = Ticker_Name3
+              ' Print the yearly change in the Summary Table
+              ws.Range("J" & Summary_Table_Row).Value = Yearly_Change
+              ' Accidentally formated as percentage, need to re-specify normal number format
+              ws.Range("J" & Summary_Table_Row).NumberFormat = "0.00"
+              ' Change cell color if conditions are met
+              If ws.Range("J" & Summary_Table_Row).Value > 0 Then
+                ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 4
+                ElseIf ws.Range("J" & Summary_Table_Row).Value < 0 Then
+                ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 3
+                Else: ws.Range("J" & Summary_Table_Row).Interior.ColorIndex = 6
+              End If
+              
+              ' Print the percent change in yearly stock value in the Summary Table
+              ws.Range("K" & Summary_Table_Row).Value = Percent_Change
+              ws.Range("K" & Summary_Table_Row).NumberFormat = "0.00%"
+              ' Print the ticker volume to the Summary Table
+              ws.Range("L" & Summary_Table_Row).Value = Ticker_Volume
+              ws.Range("L" & Summary_Table_Row).ColumnWidth = 18
+              ws.Range("L" & Summary_Table_Row).NumberFormat = "#,##0"
+              ' Print the ticker yearly starting open value in summary table
+              ws.Range("M" & Summary_Table_Row).Value = Year_Open_Ticker
+              ' Print the ticker yearly ending close value in summary table
+              ws.Range("N" & Summary_Table_Row).Value = Year_Close_Ticker
+        
+              ' Add one to the summary table row
+              Summary_Table_Row = Summary_Table_Row + 1
+              
+              ' Reset the ticker volume
+              Ticker_Volume = 0
+        
+            ' If the cell immediately following a row is the same ticker symbol...
+            Else
+        
+              ' Add to the ticker volume
+              Ticker_Volume = Ticker_Volume + ws.Cells(I, 7).Value
+                                                        
+        End If
+        
+                              
+      Next I
+             
+ ' Attempting a few methods to get the summary table correct. Ticker match not working...
+ ' WorksheetFunction.vlookup didn't work...
+            
+            Dim MaxValue As Double
+            Dim MinValue As Double
+            Dim MaxVolume As Double
+            Dim LastRowTable As Integer
+                                   
+            ' Label column headers to match lesson
+            ws.Cells(1, 17).Value = "Ticker"
+            ws.Cells(1, 18).Value = "Value"
+        
+            ' Label row headers to match lesson
+            ws.Cells(2, 16).Value = "Greatest % Increase"
+            ws.Cells(2, 16).ColumnWidth = 22
+            ws.Cells(2, 16).Font.Bold = True
+            ws.Cells(3, 16).Value = "Greatest % Decrease"
+            ws.Cells(3, 16).Font.Bold = True
+            ws.Cells(4, 16).Value = "Greatest Total Volume"
+            ws.Cells(4, 16).Font.Bold = True
+            
+            ' Locate last used (not empty) row for column R (max/min table)
+            LastRowTable = ws.Cells(Rows.Count, 9).End(xlUp).Row
+            MsgBox ("Total Ticker Symbols: " + Str(LastRowTable))
+            
+            ' Lowest value of column K, starting at 0
+            MinValue = 0
+            ' Highest value of column K, starting at 0
+            MaxValue = 0
+            ' Greatest trading volume value of column L, starting at 0
+            MaxVolume = 0
+            
+            MinValue = WorksheetFunction.Min(ws.Range("K:K"))
+            MaxValue = WorksheetFunction.max(ws.Range("K:K"))
+            MaxVolume = WorksheetFunction.max(ws.Range("L:L"))
+            MsgBox MinValue
+            MsgBox MaxValue
+            MsgBox MaxVolume
+            ws.Cells(2, 18).Value = MinValue
+            ws.Cells(2, 18).NumberFormat = "0.00%"
+            ws.Cells(3, 18).Value = MaxValue
+            ws.Cells(3, 18).NumberFormat = "0.00%"
+            ws.Cells(4, 18).Value = MaxVolume
+            ws.Cells(4, 18).NumberFormat = "#,##0"
+            ws.Cells(4, 18).ColumnWidth = 18
+            
+            Dim MinValueTicker As String
+            Dim MaxValueTicker As String
+            Dim MaxVolumeTicker As String
+            Dim SummaryRange As Range
+            
+            'Set SummaryRange = Range(Cells(2, 9), Cells(91, 9))
+            'MinValueTicker = Application.WorksheetFunction.VLookup(MinValue, SummaryRange, 1, False)
+            'ws.Cells(2, 17).Value = MinValueTicker
+                           
+             'For N = 2 To LastRowTable
+                'If ws.Cells(3, 18).Value = ws.Cells(N, 11).Value Then
+                    'MinValueTicker = ws.Cells(N, 11)
+                    'ws.Cells(17, 3).Value = MinValueTicker
+                'End If
+            
+             'Next N
+            
+                               
+                   
+                                                      
+        'End If
+        
+                              
+      'Next I
+               
+Next ws
+
+End Sub
+
+Screen capture of spreadsheet before the macro was run:
+
+

@@ -1,7 +1,7 @@
 # vba-challenge
 UOM_DS VBA stock ticker challenge
 
-obert Bentz Readme.md additions for homework turn-in
+Robert Bentz Readme.md additions for homework turn-in
 
 Below are two text files (macro scripts, txt format) used in the spreadsheet, "Multiple_year_stock_data_RDB.xlsm".
 The second file is a stepped version to check how the script is running (Page6). Page7 the MsgBox was remarked out.

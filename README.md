@@ -433,4 +433,24 @@ End Sub
 
 Screen capture of spreadsheet before the macro was run:
 
+https://github.com/rdb89/vba-challenge/blob/main/Screenshot%202023-01-09%20VBA%20Start.png
+
+Screen capture of VBA script:
+
+https://github.com/rdb89/vba-challenge/blob/main/Screenshot%202023-01-09%20VBA%20Script.png
+
+Screen capture of spreadsheet macro output for 2018:
+
+https://github.com/rdb89/vba-challenge/blob/main/Screenshot%202023-01-09%20VBA%202018.png
+
+Screen capture of spreadsheet of macro output for 2019:
+
+https://github.com/rdb89/vba-challenge/blob/main/Screenshot%202023-01-09%20VBA%202019.png
+
+Screen capture of spreadsheet of macro output for 2020:
+
+https://github.com/rdb89/vba-challenge/blob/main/Screenshot%202023-01-09%20VBA%202020.png
+
+
+
 
